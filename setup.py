@@ -8,5 +8,6 @@ setup(name='lambda-customresource',
       author='Scott VanDenPlas',
       author_email='scott@elelsee.com',
       url='https://github.com/elelsee/lambda-customresource',
-      packages=['requests==2.8.1'],
+      packages=['lambda-customresource'],
+      install_requires = ['requests==2.8.1']
      )
