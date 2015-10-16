@@ -1,0 +1,1 @@
+https://github.com/elelsee/lambda-customresource/archive/master.zip
