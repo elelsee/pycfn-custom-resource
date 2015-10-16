@@ -6,7 +6,7 @@ log.setLevel(logging.INFO)
 class myCustomResource(customresource.CustomResource):
     """Example of how to override the methods for Resource Events"""
     def __init__(self, event):
-        super(DevCustomResource, self).__init__(event)
+        super(myCustomResource, self).__init__(event)
 
     def create(self):
         # Results dict referenced by GetAtt in template
