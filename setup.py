@@ -1,6 +1,5 @@
-#!/usr/bin/env python
+from setuptools import setup, find_packages
 
-from distutils.core import setup
 
 setup(name='lambda-customresource',
       version='0.1',
@@ -8,6 +7,6 @@ setup(name='lambda-customresource',
       author='Scott VanDenPlas',
       author_email='scott@elelsee.com',
       url='https://github.com/elelsee/lambda-customresource',
-      packages=['lambda-customresource'],
+      packages=find_packages(),
       install_requires = ['requests==2.8.1']
      )
