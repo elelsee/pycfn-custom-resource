@@ -8,6 +8,6 @@ setup(name='pycfn-customresource',
       author_email='scott@elelsee.com',
       url='https://github.com/elelsee/lambda-customresource',
       packages=find_packages(),
-      py_modules= ['pycfn-customresource.customresource', 'pycfn-customresource.util'],
+      py_modules= ['pycfn_custom_resource.lambda', 'pycfn_custom_resource.util'],
       install_requires = ['requests==2.8.1']
      )
