@@ -1,4 +1,4 @@
-# lambda-customresource
+# pycfn-custom-resource
 A helper object to create AWS Cloudformation Lambda-backed CustomResources in python
 
 Please see example in handler.py. Update example.template accordingly.
