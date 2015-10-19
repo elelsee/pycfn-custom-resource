@@ -118,7 +118,7 @@ class CustomResource(object):
             e = sys.exc_info()
             log.error(u"Command %s-%s failed", self.logicalresourceid, self.requesttype)
             log.debug(u"Command %s output: %s", self.logicalresourceid, e[0])
-            log.debug(u"Command %s traceback: %s", self.logicalresourceid, traceback.print_tb(e[2])
+            log.debug(u"Command %s traceback: %s", self.logicalresourceid, traceback.print_tb(e[2]))
             success = False
 
         self.send_result(success, self.result_attributes)
