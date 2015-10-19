@@ -3,6 +3,7 @@ import requests
 import json
 import uuid
 import sys
+import traceback
 
 import logging
 log = logging.getLogger()
@@ -114,8 +115,10 @@ class CustomResource(object):
             else:
                 raise ValueError(u"Results must be a JSON object")
         except:
+            e = sys.exc_info()
             log.error(u"Command %s-%s failed", self.logicalresourceid, self.requesttype)
-            log.debug(u"Command %s output: %s", self.logicalresourceid, e)
+            log.debug(u"Command %s output: %s", self.logicalresourceid, e[0])
+            log.debug(u"Command %s traceback: %s", self.logicalresourceid, traceback.print_tb(e[2])
             success = False
 
         self.send_result(success, self.result_attributes)
