@@ -2,6 +2,7 @@ import util
 import requests
 import json
 import uuid
+import sys
 
 import logging
 log = logging.getLogger()
@@ -114,7 +115,7 @@ class CustomResource(object):
                 raise ValueError(u"Results must be a JSON object")
         except:
             log.error(u"Command %s-%s failed", self.logicalresourceid, self.requesttype)
-            log.debug(u"Command %s output: %s", self.logicalresourceid, self.result_text)
+            log.debug(u"Command %s output: %s", self.logicalresourceid, e)
             success = False
 
         self.send_result(success, self.result_attributes)
