@@ -1,25 +1,13 @@
 # pycfn-custom-resource
 A helper object to create AWS Cloudformation Lambda-backed CustomResources in python
 
-Please see example in handler.py. Update example.template accordingly.
-
-``` shell
-./build_lambda_zip.sh
-aws s3 cp ./handler.zip s3://bucket/prefix/
-aws s3 cp ./example.template s3://bucket/prefix/
-aws cloudformation create-stack --stack-name somestack \
-    --template-url https://s3.amazonaws.com/bucket/prefix/example.template \
-    --capabilities CAPABILITY_IAM
-```
+Please see [pycfn_elasticsearch](https://github.com/elelsee/pycfn-elasticsearch) for an example.
 
 ### Example
 ``` python
-import customresource
-import logging
-log = logging.getLogger()
-log.setLevel(logging.INFO)
+from pycfn_custom_resource.lambda_backed import CustomResource
 
-class myCustomResource(customresource.CustomResource):
+class myCustomResource(CustomResource):
     """Example of how to override the methods for Resource Events"""
     def __init__(self, event):
         super(myCustomResource, self).__init__(event)
