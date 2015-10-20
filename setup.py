@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 
 setup(name='pycfn-custom-resource',
-      version='0.1',
+      version='0.2',
       description='AWS Cloudformation Lambda-backed CustomResources in Python',
       author='Scott VanDenPlas',
       author_email='scott@elelsee.com',
