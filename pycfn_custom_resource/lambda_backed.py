@@ -28,6 +28,7 @@ class CustomResource(object):
         self._requesttype = event.get("RequestType")
         self._servicetoken = event.get("ServiceToken")
         self._stackid = event.get("StackId")
+        self._region = self._get_region()
         self.result_text = None
         self.result_attributes = None
 
@@ -80,6 +81,12 @@ class CustomResource(object):
 
     def update(self):
         return {}
+
+    def _get_region(self):
+        if 'Region' in self._resourceproperties:
+            return self._resourceproperties['Region']
+        else: 
+            return self._stackid.split(':')[3]
 
     def determine_event_timeout(self):
         if self.requesttype == "Create":
