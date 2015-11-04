@@ -48,10 +48,7 @@ class CustomResource(object):
 
     @property
     def physicalresourceid(self):
-        if self._physicalresourceid:
-            return self._physicalresourceid
-        else:
-            return str(uuid.uuid4())
+        return self._physicalresourceid
 
     @property
     def requestid(self):
@@ -122,7 +119,7 @@ class CustomResource(object):
         response = client.invoke(
             FunctionName=self._context.function_name,
             InvocationType='Event',
-            Payload=source_attributes,
+            Payload=json.dumps(source_attributes),
             Qualifier=self._context.function_version
         )
 
@@ -149,8 +146,9 @@ class CustomResource(object):
         except:
             e = sys.exc_info()
             log.error(u"Command %s-%s failed", self.logicalresourceid, self.requesttype)
-            log.debug(u"Command %s output: %s", self.logicalresourceid, e[0])
-            log.debug(u"Command %s traceback: %s", self.logicalresourceid, traceback.print_tb(e[2]))
+            log.debug(u"Command %s error: %s", self.logicalresourceid, str(e[1]))
+            log.debug(u"Command %s traceback:", self.logicalresourceid)
+            traceback.print_tb(e[2])
             success = False
 
         log.debug(u"Command %s-%s processing %s", self.logicalresourceid, self.requesttype, self.processing)
