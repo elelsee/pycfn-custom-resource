@@ -101,7 +101,7 @@ class CustomResource(object):
             "RequestId": 
                 self.requestid,
             "LogicalResourceId": 
-                self.logicalresourceid
+                self.logicalresourceid,
             "PhysicalResourceId": 
                 self.physicalresourceid if self.physicalresourceid else str(uuid.uuid4())
         }
