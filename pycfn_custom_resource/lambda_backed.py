@@ -4,6 +4,8 @@ import json
 import uuid
 import sys
 import traceback
+import boto3
+from time import sleep
 
 import logging
 log = logging.getLogger()
@@ -17,8 +19,9 @@ _DEFAULT_UPDATE_TIMEOUT = 30 * 60
 
 
 class CustomResource(object):
-    def __init__(self, event):
+    def __init__(self, event, context):
         self._event = event
+        self._context = context
         self._logicalresourceid = event.get("LogicalResourceId")
         self._physicalresourceid = event.get("PhysicalResourceId")
         self._requestid = event.get("RequestId")
@@ -29,8 +32,9 @@ class CustomResource(object):
         self._servicetoken = event.get("ServiceToken")
         self._stackid = event.get("StackId")
         self._region = self._get_region()
-        self.result_text = None
-        self.result_attributes = None
+        self.result_text = event.get("Data")
+        self.result_attributes = {}
+        self.processing = True if self.result_text else False
 
         # Set timeout for actions
         self._create_timeout = _DEFAULT_CREATE_TIMEOUT
@@ -88,39 +92,52 @@ class CustomResource(object):
         else: 
             return self._stackid.split(':')[3]
 
-    def determine_event_timeout(self):
-        if self.requesttype == "Create":
-            timeout = self._create_timeout
-        elif self.requesttype == "Delete":
-            timeout = self._delete_timeout
-        else:
-            timeout = self._update_timeout
+    def _get_source_attributes(self, success):
+        source_attributes = {
+            "Status": 
+                "SUCCESS" if success else "FAILED",
+            "StackId": 
+                self.stackid,
+            "RequestId": 
+                self.requestid,
+            "LogicalResourceId": 
+                self.logicalresourceid
+            "PhysicalResourceId": 
+                self.physicalresourceid if self.physicalresourceid else str(uuid.uuid4())
+        }
+        return source_attributes
 
-        return timeout
+    def invoke_chained_lambda(self):
+        source_attributes = self._event
+        source_attributes.update(self.result_attributes)
+        client = boto3.client('lambda')
+        response = client.invoke(
+            FunctionName=self.context.function_name,
+            InvocationType='Event',
+            Payload=source_attributes,
+            Qualifier=self.context.function_version
+        )
 
     def process_event(self):
         if self.requesttype == "Create":
             command = self.create
         elif self.requesttype == "Delete":
             command = self.delete
-        else:
+        elif self.requesttype == "Update":
             command = self.update
 
         try:
             self.result_text = command()
             success = True
-            if isinstance(self.result_text, dict):
-                try:
-                    self.result_attributes = { "Data" : self.result_text }
-                    log.info(u"Command %s-%s succeeded", self.logicalresourceid, self.requesttype)
-                    log.debug(u"Command %s output: %s", self.logicalresourceid, self.result_text)
-                except:
-                    log.error(u"Command %s-%s returned invalid data: %s", self.logicalresourceid,
-                              self.requesttype, self.result_text)
-                    success = False
-                    self.result_attributes = {}
-            else:
-                raise ValueError(u"Results must be a JSON object")
+            try:
+                self.result_attributes = { "Data" : self.result_text }
+                log.info(u"Command %s-%s succeeded", self.logicalresourceid, self.requesttype)
+                log.debug(u"Command %s output: %s", self.logicalresourceid, self.result_text)
+            except:
+                log.error(u"Command %s-%s returned invalid data: %s", self.logicalresourceid,
+                          self.requesttype, self.result_text)
+                success = False
+
         except:
             e = sys.exc_info()
             log.error(u"Command %s-%s failed", self.logicalresourceid, self.requesttype)
@@ -128,25 +145,15 @@ class CustomResource(object):
             log.debug(u"Command %s traceback: %s", self.logicalresourceid, traceback.print_tb(e[2]))
             success = False
 
-        self.send_result(success, self.result_attributes)
+        if self.processing and success:
+            sleep(60)
+            self.invoke_chained_lambda()
+        else:
+            self.send_result(success)
 
-    def send_result(self, success, attributes):
-        attributes = attributes if attributes else {}
-        source_attributes = {
-            "Status": "SUCCESS" if success else "FAILED",
-            "StackId": self.stackid,
-            "RequestId": self.requestid,
-            "LogicalResourceId": self.logicalresourceid
-        }
-
-        source_attributes['PhysicalResourceId'] = self.physicalresourceid
-        if not source_attributes['PhysicalResourceId']:
-            source_attributes['PhysicalResourceId'] = str(uuid.uuid4())
-
-        if not success:
-            source_attributes["Reason"] = "Unknown Failure"
-
-        source_attributes.update(attributes)
+    def send_result(self, success):
+        source_attributes = self._get_source_attributes(success)
+        source_attributes.update(self.result_attributes)
         log.debug(u"Sending result: %s", source_attributes)
         self._put_response(source_attributes)
 
