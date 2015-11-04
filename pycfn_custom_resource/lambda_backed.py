@@ -108,6 +108,7 @@ class CustomResource(object):
         return source_attributes
 
     def invoke_chained_lambda(self):
+        log.info(u"Invoking chained lambda %s-%s", self.logicalresourceid, self.requesttype)
         source_attributes = self._event
         source_attributes.update(self.result_attributes)
         client = boto3.client('lambda')
@@ -145,6 +146,8 @@ class CustomResource(object):
             log.debug(u"Command %s traceback: %s", self.logicalresourceid, traceback.print_tb(e[2]))
             success = False
 
+        log.debug(u"Command %s-%s processing %s", self.logicalresourceid, self.requesttype, self.processing)
+        log.debug(u"Command %s-%s success %s", self.logicalresourceid, self.requesttype, success)
         if self.processing and success:
             sleep(60)
             self.invoke_chained_lambda()
