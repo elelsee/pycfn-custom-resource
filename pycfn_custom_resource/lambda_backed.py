@@ -31,6 +31,7 @@ class CustomResource(object):
         self._requesttype = event.get("RequestType")
         self._servicetoken = event.get("ServiceToken")
         self._stackid = event.get("StackId")
+        self._stackname = self._get_stackname()
         self._region = self._get_region()
         self.result_text = event.get("Data")
         self.result_attributes = {}
@@ -47,7 +48,10 @@ class CustomResource(object):
 
     @property
     def physicalresourceid(self):
-        return self._physicalresourceid
+        if self._physicalresourceid:
+            return self._physicalresourceid
+        else:
+            return str(uuid.uuid4())
 
     @property
     def requestid(self):
@@ -91,6 +95,9 @@ class CustomResource(object):
             return self._resourceproperties['Region']
         else: 
             return self._stackid.split(':')[3]
+
+    def _get_stackname(self):
+        return stack_id.split(':')[-1].split('/')[1]
 
     def _get_source_attributes(self, success):
         source_attributes = {
