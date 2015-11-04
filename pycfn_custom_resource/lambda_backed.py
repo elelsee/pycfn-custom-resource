@@ -97,7 +97,7 @@ class CustomResource(object):
             return self._stackid.split(':')[3]
 
     def _get_stackname(self):
-        return stack_id.split(':')[-1].split('/')[1]
+        return self.stackid.split(':')[-1].split('/')[1]
 
     def _get_source_attributes(self, success):
         source_attributes = {
@@ -120,10 +120,10 @@ class CustomResource(object):
         source_attributes.update(self.result_attributes)
         client = boto3.client('lambda')
         response = client.invoke(
-            FunctionName=self.context.function_name,
+            FunctionName=self._context.function_name,
             InvocationType='Event',
             Payload=source_attributes,
-            Qualifier=self.context.function_version
+            Qualifier=self._context.function_version
         )
 
     def process_event(self):
