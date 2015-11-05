@@ -154,10 +154,13 @@ class CustomResource(object):
         log.debug(u"Command %s-%s processing %s", self.logicalresourceid, self.requesttype, self.processing)
         log.debug(u"Command %s-%s success %s", self.logicalresourceid, self.requesttype, success)
         if self.processing and success:
+            log.info(u"Command %s-%s sleeping for 60 seconds", self.logicalresourceid, self.requesttype)
             sleep(60)
             self.invoke_chained_lambda()
         else:
             self.send_result(success)
+
+        log.info(u"Command %s-%s processing completed", self.logicalresourceid, self.requesttype)
 
     def send_result(self, success):
         source_attributes = self._get_source_attributes(success)
